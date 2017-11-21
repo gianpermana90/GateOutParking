@@ -51,12 +51,14 @@ public class queryTicket {
 //                res.setGateOutPicture1(rs.getString("gateoutpic"));
 //                res.setGateOutPicture2(rs.getString("gateoutpictwo"));
             }
-        }catch(SQLException e){     
-            if(e.toString().contentEquals("can not be represented as java.sql.Timestamp")){
-                System.out.println("Pembayaran belum dilakukan");
-            }else{
-                Logger.getLogger(queryTicket.class.getName()).log(Level.SEVERE, null, e);
-            }
+        }catch(SQLException e){   
+//            String errorCode = e.toString();
+//            if(errorCode.contains("can not be represented as java.sql.Timestamp")){
+//                System.out.println("There is no payment process has not been made for this barcode");
+//            }else{
+//                Logger.getLogger(queryTicket.class.getName()).log(Level.SEVERE, null, e);
+//            }
+            System.out.println(e);
         }
         connect.logOff();
         return res;

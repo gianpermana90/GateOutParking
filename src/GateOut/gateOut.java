@@ -10,8 +10,10 @@ import config.Params;
 import db.queryPayment;
 import db.queryTicket;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,7 +28,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -45,7 +50,7 @@ public class gateOut extends javax.swing.JFrame {
     private Ticket tkt = new Ticket();
 
     SimpleDateFormat formatTime = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
-    
+
     private static final int BUFFER_SIZE = 4096;
 
     private static final long THRESHOLD = 100;
@@ -55,8 +60,8 @@ public class gateOut extends javax.swing.JFrame {
 
     public gateOut() {
         initComponents();
-        setLocationRelativeTo(this);
-        
+        this.setExtendedState(MAXIMIZED_BOTH);
+
         StyledDocument doc = txtOutput.getStyledDocument();
         SimpleAttributeSet center = new SimpleAttributeSet();
         StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
@@ -79,12 +84,15 @@ public class gateOut extends javax.swing.JFrame {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     if (barcode.length() >= MIN_BARCODE_LENGTH) {
                         getDataTicket(barcode.toString());
-                        if (checkExpiredTime()) {
+                        if (checkExpiredTime() == 1) {
                             txtbarcode.setText(barcode.toString());
                             txtOutput.setText("Scan Berhasil\n \nNamun jam Pembayaran sudah melewati batas, silahkan bayar kelebihan biaya pada staf parkir terdekat");
-                        } else {
+                        } else if (checkExpiredTime() == 2) {
                             txtbarcode.setText(barcode.toString());
                             txtOutput.setText("Scan Berhasil\n \nTerima kasih");
+                        } else {
+                            txtbarcode.setText(barcode.toString());
+                            txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
                         }
                     }
                     barcode.delete(0, barcode.length());
@@ -97,9 +105,15 @@ public class gateOut extends javax.swing.JFrame {
             }
         });
     }
+    
+    private void makeFrameFullSize(JFrame aFrame) {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        aFrame.setSize(screenSize.width, screenSize.height);
+        panelBase.setSize(screenSize.width, screenSize.height);
+    }
 
-    private boolean checkExpiredTime() {
-        boolean result = false;
+    private int checkExpiredTime() {
+        int result = 1;
         SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             //initiate payment time
@@ -112,15 +126,16 @@ public class gateOut extends javax.swing.JFrame {
             limitTime = cal.getTime();
             //compare between limit time and current time
             Date now = new Date();
-            if(now.after(limitTime)){
-                result = true;
-            }else{
-                result = false;
+            if (now.after(limitTime)) {
+                result = 1;
+            } else {
+                result = 2;
             }
         } catch (ParseException ex) {
             Logger.getLogger(gateOut.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NullPointerException ex){
-            System.out.println("ANDA BELUM BAYAR");
+        } catch (NullPointerException ex) {
+            System.out.println("There is no payment process has been made for this barcode");
+            result = 3;
         }
         return result;
     }
@@ -145,7 +160,7 @@ public class gateOut extends javax.swing.JFrame {
             System.out.println("Ada Error");
         }
     }
-    
+
     private void getPic(String ip) throws Exception {
         String urlip = "http://" + ip + "/cgi-bin/snapshot.cgi";
         URL url = new URL(urlip);
@@ -199,6 +214,10 @@ public class gateOut extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel2 = new javax.swing.JPanel();
+        jDialog1 = new javax.swing.JDialog();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
         panelBase = new javax.swing.JPanel();
         panelMain = new javax.swing.JPanel();
         panelScan = new javax.swing.JPanel();
@@ -215,6 +234,7 @@ public class gateOut extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         txtNoPol = new javax.swing.JLabel();
         panelOutput = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         txtOutput = new javax.swing.JTextPane();
 
@@ -229,16 +249,61 @@ public class gateOut extends javax.swing.JFrame {
             .addGap(0, 100, Short.MAX_VALUE)
         );
 
+        jPanel1.setBackground(new java.awt.Color(0, 0, 0));
+
+        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel3.setText("jLabel3");
+        jLabel3.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+
+        jButton1.setText("jButton1");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(157, 157, 157)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(167, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout jDialog1Layout = new javax.swing.GroupLayout(jDialog1.getContentPane());
+        jDialog1.getContentPane().setLayout(jDialog1Layout);
+        jDialog1Layout.setHorizontalGroup(
+            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jDialog1Layout.setVerticalGroup(
+            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMaximumSize(new java.awt.Dimension(850, 480));
         setUndecorated(true);
         setResizable(false);
-        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         panelBase.setBackground(new java.awt.Color(102, 102, 102));
 
+        panelMain.setBackground(new java.awt.Color(102, 102, 102));
+
         panelScan.setBackground(new java.awt.Color(102, 102, 102));
-        panelScan.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        panelScan.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         panelScan.setLayout(new java.awt.CardLayout());
 
         panelFront.setBackground(new java.awt.Color(102, 102, 102));
@@ -254,21 +319,21 @@ public class gateOut extends javax.swing.JFrame {
             panelFrontLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelFrontLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtbarcode, javax.swing.GroupLayout.DEFAULT_SIZE, 520, Short.MAX_VALUE)
+                .addComponent(txtbarcode, javax.swing.GroupLayout.DEFAULT_SIZE, 348, Short.MAX_VALUE)
                 .addContainerGap())
         );
         panelFrontLayout.setVerticalGroup(
             panelFrontLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelFrontLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtbarcode, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE)
+                .addComponent(txtbarcode, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         panelScan.add(panelFront, "card3");
 
         panelInfo.setBackground(new java.awt.Color(102, 102, 102));
-        panelInfo.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        panelInfo.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         panelInfoGrid.setBackground(new java.awt.Color(102, 102, 102));
         panelInfoGrid.setLayout(new java.awt.GridLayout(4, 2));
@@ -329,28 +394,21 @@ public class gateOut extends javax.swing.JFrame {
             panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(panelInfoGrid, javax.swing.GroupLayout.DEFAULT_SIZE, 323, Short.MAX_VALUE)
+                .addComponent(panelInfoGrid, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         panelOutput.setBackground(new java.awt.Color(0, 0, 0));
 
-        txtOutput.setEditable(false);
-        txtOutput.setBackground(new java.awt.Color(0, 0, 0));
-        txtOutput.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
-        txtOutput.setFocusable(false);
-        txtOutput.setOpaque(false);
-        jScrollPane1.setViewportView(txtOutput);
-
         javax.swing.GroupLayout panelOutputLayout = new javax.swing.GroupLayout(panelOutput);
         panelOutput.setLayout(panelOutputLayout);
         panelOutputLayout.setHorizontalGroup(
             panelOutputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
+            .addGap(0, 564, Short.MAX_VALUE)
         );
         panelOutputLayout.setVerticalGroup(
             panelOutputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout panelMainLayout = new javax.swing.GroupLayout(panelMain);
@@ -360,22 +418,47 @@ public class gateOut extends javax.swing.JFrame {
             .addGroup(panelMainLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(panelScan, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(panelInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(panelOutput, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(panelInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(panelScan, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
+                .addComponent(panelOutput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         panelMainLayout.setVerticalGroup(
             panelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelMainLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelMainLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(panelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(panelMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(panelOutput, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(panelMainLayout.createSequentialGroup()
                         .addComponent(panelScan, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(panelInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(panelOutput, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(panelInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+
+        jPanel3.setBackground(new java.awt.Color(102, 102, 102));
+
+        txtOutput.setEditable(false);
+        txtOutput.setBackground(new java.awt.Color(0, 0, 0));
+        txtOutput.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        txtOutput.setFocusable(false);
+        txtOutput.setOpaque(false);
+        jScrollPane1.setViewportView(txtOutput);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1)
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -385,7 +468,9 @@ public class gateOut extends javax.swing.JFrame {
             panelBaseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelBaseLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(panelMain, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(panelBaseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(panelMain, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         panelBaseLayout.setVerticalGroup(
@@ -393,15 +478,30 @@ public class gateOut extends javax.swing.JFrame {
             .addGroup(panelBaseLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(panelMain, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
-        getContentPane().add(panelBase, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 850, 480));
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(panelBase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(panelBase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    
 
     /**
      * @param args the command line arguments
@@ -439,11 +539,16 @@ public class gateOut extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JDialog jDialog1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPanel panelBase;
     private javax.swing.JPanel panelFront;
