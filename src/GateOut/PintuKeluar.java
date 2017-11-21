@@ -9,11 +9,14 @@ import cls.Ticket;
 import config.Params;
 import db.queryTicket;
 import java.awt.Color;
+import java.awt.Image;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -23,6 +26,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -37,7 +43,6 @@ public class PintuKeluar extends javax.swing.JFrame {
     /**
      * Creates new form PintuKeluar
      */
-    
     //initial value for barcode program
     private static final long THRESHOLD = 100;
     private static final int MIN_BARCODE_LENGTH = 8;
@@ -49,17 +54,17 @@ public class PintuKeluar extends javax.swing.JFrame {
     SimpleDateFormat formatTime = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
     //initial for get picture
     private static final int BUFFER_SIZE = 4096;
-    
+
     public PintuKeluar() {
         initComponents();
         this.setExtendedState(MAXIMIZED_BOTH);
-        
+
         StyledDocument doc = txtOutput.getStyledDocument();
         SimpleAttributeSet center = new SimpleAttributeSet();
         StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
         doc.setParagraphAttributes(0, doc.getLength(), center, false);
         txtOutput.setDisabledTextColor(Color.BLACK);
-        
+
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
             @Override
             public boolean dispatchKeyEvent(KeyEvent e) {
@@ -75,6 +80,7 @@ public class PintuKeluar extends javax.swing.JFrame {
 
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     if (barcode.length() >= MIN_BARCODE_LENGTH) {
+                        clearInfo();
                         getDataTicket(barcode.toString());
                         if (checkExpiredTime() == 1) {
                             txtbarcode.setText(barcode.toString());
@@ -86,6 +92,7 @@ public class PintuKeluar extends javax.swing.JFrame {
                             txtbarcode.setText(barcode.toString());
                             txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
                         }
+                        showImage();
                     }
                     barcode.delete(0, barcode.length());
                 } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
@@ -97,7 +104,26 @@ public class PintuKeluar extends javax.swing.JFrame {
             }
         });
     }
-    
+
+    private void showImage() {
+        BufferedImage image1 = null;
+        BufferedImage image2 = null;
+        try {
+            URL url1 = new URL("http://localhost/giantlab/Cam1.jpg");
+            URL url2 = new URL("http://localhost/giantlab/Cam2.jpg");
+            image1 = ImageIO.read(url1);
+            image2 = ImageIO.read(url2);
+        } catch (IOException exp) {
+            System.out.println("Error");
+        }
+        Image cam1 = image1.getScaledInstance(labelCam1.getWidth(), labelCam1.getHeight(), Image.SCALE_SMOOTH);
+        Image cam2 = image2.getScaledInstance(labelCam1.getWidth(), labelCam1.getHeight(), Image.SCALE_SMOOTH);
+        labelCam1.setIcon(new ImageIcon(cam1));
+        labelCam1.setText("");
+        labelCam2.setIcon(new ImageIcon(cam2));
+        labelCam2.setText("");
+    }
+
     private int checkExpiredTime() {
         int result = 1;
         SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -125,7 +151,7 @@ public class PintuKeluar extends javax.swing.JFrame {
         }
         return result;
     }
-    
+
     private void clearInfo() {
         txtbarcode.setText("-");
         txtGate.setText("-");
@@ -133,6 +159,8 @@ public class PintuKeluar extends javax.swing.JFrame {
         txtJamBayar.setText("-");
         txtNoPol.setText("-");
         txtOutput.setText("Scan tiket terlebih dahulu");
+        labelCam1.setIcon(null);
+        labelCam2.setIcon(null);
     }
 
     private void getDataTicket(String code) {
@@ -202,8 +230,8 @@ public class PintuKeluar extends javax.swing.JFrame {
         panelBase = new javax.swing.JPanel();
         panelFoto = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        jLabel10 = new javax.swing.JLabel();
-        jLabel11 = new javax.swing.JLabel();
+        labelCam1 = new javax.swing.JLabel();
+        labelCam2 = new javax.swing.JLabel();
         panelScan = new javax.swing.JPanel();
         txtbarcode = new javax.swing.JLabel();
         panelInfo = new javax.swing.JPanel();
@@ -221,18 +249,19 @@ public class PintuKeluar extends javax.swing.JFrame {
         txtOutput = new javax.swing.JTextPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setUndecorated(true);
 
         panelBase.setBackground(new java.awt.Color(153, 153, 153));
 
         jPanel2.setLayout(new java.awt.GridLayout(2, 1, 0, 10));
 
-        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel10.setText("Image Cam 1");
-        jPanel2.add(jLabel10);
+        labelCam1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelCam1.setText("Image Cam 1");
+        jPanel2.add(labelCam1);
 
-        jLabel11.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel11.setText("Image Cam 2");
-        jPanel2.add(jLabel11);
+        labelCam2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelCam2.setText("Image Cam 2");
+        jPanel2.add(labelCam2);
 
         javax.swing.GroupLayout panelFotoLayout = new javax.swing.GroupLayout(panelFoto);
         panelFoto.setLayout(panelFotoLayout);
@@ -431,8 +460,6 @@ public class PintuKeluar extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
@@ -440,6 +467,8 @@ public class PintuKeluar extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel labelCam1;
+    private javax.swing.JLabel labelCam2;
     private javax.swing.JPanel panelBase;
     private javax.swing.JPanel panelFoto;
     private javax.swing.JPanel panelInfo;
