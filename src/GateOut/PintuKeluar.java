@@ -8,10 +8,13 @@ package GateOut;
 import cls.Ticket;
 import config.Params;
 import db.queryTicket;
+import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.Robot;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -65,63 +68,101 @@ public class PintuKeluar extends javax.swing.JFrame {
         doc.setParagraphAttributes(0, doc.getLength(), center, false);
         txtOutput.setDisabledTextColor(Color.BLACK);
 
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
-            @Override
-            public boolean dispatchKeyEvent(KeyEvent e) {
-                if (e.getID() != KeyEvent.KEY_RELEASED) {
-                    return false;
-                }
-
-                if (e.getWhen() - lastEventTimeStamp > THRESHOLD) {
-                    barcode.delete(0, barcode.length());
-                }
-
-                lastEventTimeStamp = e.getWhen();
-
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (barcode.length() >= MIN_BARCODE_LENGTH) {
-                        clearInfo();
-                        getDataTicket(barcode.toString());
-                        if (checkExpiredTime() == 1) {
-                            txtbarcode.setText(barcode.toString());
-                            txtOutput.setText("Scan Berhasil\n \nSaat ini anda sudah melewati batas waktu untuk keluar, silahkan bayar kelebihan biaya pada staf parkir terdekat");
-                        } else if (checkExpiredTime() == 2) {
-                            txtbarcode.setText(barcode.toString());
-                            txtOutput.setText("Scan Berhasil\n \nTerima kasih");
-                        } else {
-                            txtbarcode.setText(barcode.toString());
-                            txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
-                        }
-                        showImage();
+//      JIKA HASIL BARCODE SCANNER TIDAK MENGANDUNG KEY CODE ENTER
+        this.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent k) {
+                barcode.append(k.getKeyChar());
+                if (barcode.length() == 16) {
+                    tkt = new queryTicket().getData(barcode.toString());
+                    showDataTicket(barcode.toString());
+                    if (checkExpiredTime() == 1) {
+                        txtbarcode.setText(barcode.toString());
+                        txtOutput.setText("Scan Berhasil\n \nSaat ini anda sudah melewati batas waktu untuk keluar, silahkan bayar kelebihan biaya pada staf parkir terdekat");
+                        barcode.delete(0, barcode.length());
+                    } else if (checkExpiredTime() == 2) {
+                        txtbarcode.setText(barcode.toString());
+                        txtOutput.setText("Scan Berhasil\n \nTerima kasih");
+                        barcode.delete(0, barcode.length());
+                    } else {
+                        txtbarcode.setText(barcode.toString());
+                        txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
+                        barcode.delete(0, barcode.length());
                     }
-                    barcode.delete(0, barcode.length());
-                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    showImage();
+                } else if (k.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     clearInfo();
-                } else {
-                    barcode.append(e.getKeyChar());
                 }
-                return false;
             }
         });
+
+//        JIKA HASIL SCAN DARI BARCODE READER MENGANDUNG KEY CODE "ENTER", GUNAKAN CODE DIBAWAH
+//        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+//            @Override
+//            public boolean dispatchKeyEvent(KeyEvent e) {
+//                if (e.getID() != KeyEvent.KEY_RELEASED) {
+//                    return false;
+//                }
+//                
+//                if (e.getWhen() - lastEventTimeStamp > THRESHOLD) {
+//                    barcode.delete(0, barcode.length());
+//                }
+//                
+//                lastEventTimeStamp = e.getWhen();
+//                
+//                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+//                    if (barcode.length() >= MIN_BARCODE_LENGTH) {
+//                        clearInfo();
+//                        getDataTicket(barcode.toString());
+//                        if (checkExpiredTime() == 1) {
+//                            txtbarcode.setText(barcode.toString());
+//                            txtOutput.setText("Scan Berhasil\n \nSaat ini anda sudah melewati batas waktu untuk keluar, silahkan bayar kelebihan biaya pada staf parkir terdekat");
+//                        } else if (checkExpiredTime() == 2) {
+//                            txtbarcode.setText(barcode.toString());
+//                            txtOutput.setText("Scan Berhasil\n \nTerima kasih");
+//                        } else {
+//                            txtbarcode.setText(barcode.toString());
+//                            txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
+//                        }
+//                        showImage();
+//                    }
+//                    barcode.delete(0, barcode.length());
+//                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+//                    clearInfo();
+//                } else {
+//                    barcode.append(e.getKeyChar());
+//                }
+//                return false;
+//            }
+//        });
     }
 
     private void showImage() {
         BufferedImage image1 = null;
         BufferedImage image2 = null;
+        Image cam1 = null;
+        Image cam2 = null;
+        String errorCode = "";
         try {
-            URL url1 = new URL("http://localhost/giantlab/Cam1.jpg");
-            URL url2 = new URL("http://localhost/giantlab/Cam2.jpg");
+            URL url1 = new URL("http://192.168.43.149/giantlab/" + tkt.getBarcode() + "_1.jpg");
+            URL url2 = new URL("http://192.168.43.149/giantlab/" + tkt.getBarcode() + "_2.jpg");
             image1 = ImageIO.read(url1);
             image2 = ImageIO.read(url2);
+            cam1 = image1.getScaledInstance(labelCam1.getWidth(), labelCam1.getHeight(), Image.SCALE_SMOOTH);
+            cam2 = image2.getScaledInstance(labelCam1.getWidth(), labelCam1.getHeight(), Image.SCALE_SMOOTH);
+            labelCam1.setIcon(new ImageIcon(cam1));
+            labelCam2.setIcon(new ImageIcon(cam2));
         } catch (IOException exp) {
-            System.out.println("Error");
+            errorCode = "Gambar Tidak Ditemukan";
+
         }
-        Image cam1 = image1.getScaledInstance(labelCam1.getWidth(), labelCam1.getHeight(), Image.SCALE_SMOOTH);
-        Image cam2 = image2.getScaledInstance(labelCam1.getWidth(), labelCam1.getHeight(), Image.SCALE_SMOOTH);
-        labelCam1.setIcon(new ImageIcon(cam1));
-        labelCam1.setText("");
-        labelCam2.setIcon(new ImageIcon(cam2));
-        labelCam2.setText("");
+        if (errorCode.equalsIgnoreCase("gambar tidak ditemukan")) {
+            labelCam1.setText(errorCode);
+            labelCam2.setText(errorCode);
+        }else{
+            labelCam1.setText("");
+            labelCam2.setText("");
+        }
+
     }
 
     private int checkExpiredTime() {
@@ -145,8 +186,8 @@ public class PintuKeluar extends javax.swing.JFrame {
             }
         } catch (ParseException ex) {
             Logger.getLogger(gateOut.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NullPointerException ex) {
-            System.out.println("There is no payment process has been made for this barcode");
+        } catch (NullPointerException e) {
+            System.out.println("Pembayaran Belum Dilakukan");
             result = 3;
         }
         return result;
@@ -159,20 +200,16 @@ public class PintuKeluar extends javax.swing.JFrame {
         txtJamBayar.setText("-");
         txtNoPol.setText("-");
         txtOutput.setText("Scan tiket terlebih dahulu");
-        labelCam1.setIcon(null);
+        labelCam1.setIcon(new ImageIcon(""));
         labelCam2.setIcon(null);
     }
 
-    private void getDataTicket(String code) {
-        try {
-            tkt = new queryTicket().getData(code);
-            txtGate.setText(Integer.toString(tkt.getEntranceGate()));
-            txtJamMasuk.setText(tkt.getEntranceTime());
-            txtJamBayar.setText(tkt.getPaymentTime());
-            txtNoPol.setText(tkt.getLicenseNumber());
-        } catch (Exception e) {
-            System.out.println("Ada Error");
-        }
+    private void showDataTicket(String code) {
+        clearInfo();
+        txtGate.setText(Integer.toString(tkt.getEntranceGate()));
+        txtJamMasuk.setText(tkt.getEntranceTime());
+        txtJamBayar.setText(tkt.getPaymentTime());
+        txtNoPol.setText(tkt.getLicenseNumber());
     }
 
     private void getPic(String ip) throws Exception {
