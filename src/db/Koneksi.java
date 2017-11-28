@@ -19,7 +19,7 @@ public class Koneksi {
 //    private String username = "root";// user name dbms
 //    private String password = "";// pswd dbms
 //    private String driver = "com.mysql.jdbc.Driver";
-    private String url = "jdbc:mysql://127.0.0.1:3306/hexapark"; // nama database
+    private String url = "jdbc:mysql://192.168.43.149:3306/hexapark"; // nama database
     private String username = "root";// user name dbms
     private String password = "";// pswd dbms
     

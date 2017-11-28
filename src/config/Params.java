@@ -11,7 +11,8 @@ package config;
  */
 public class Params {
     public static boolean debug = true;
-    public static String pathFoto = "/home/kasir/Documents/pos";
+//    public static String pathFoto = "/home/pi/Documents/pos";
+    public static String pathFoto = "D:\\Gian Permana\\Projects\\Hexapark\\Program\\GateOut\\dist";
 //        public static String pathFoto = "/home/administrator/img";
 
     public static String pathFotoServer = "img";

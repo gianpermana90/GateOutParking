@@ -5,9 +5,17 @@
  */
 package GateOut;
 
+import cls.RFID;
 import cls.Ticket;
+import org.nfctools.mf.MfCardListener;
+import org.nfctools.spi.acs.Acr122ReaderWriter;
+import org.nfctools.spi.acs.AcsTerminal;
+import org.nfctools.utils.CardTerminalUtils;
 import config.Params;
 import db.queryTicket;
+import interfaces.ThreadRFID;
+import interfaces.readerBarcode;
+import interfaces.readerRFID;
 import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Image;
@@ -41,7 +49,7 @@ import org.apache.commons.codec.binary.Base64;
  *
  * @author Hades
  */
-public class PintuKeluar extends javax.swing.JFrame {
+public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, readerRFID{
 
     /**
      * Creates new form PintuKeluar
@@ -57,110 +65,52 @@ public class PintuKeluar extends javax.swing.JFrame {
     SimpleDateFormat formatTime = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
     //initial for get picture
     private static final int BUFFER_SIZE = 4096;
+    //initial for RFID
+    RFID nfc = new RFID();
 
     public PintuKeluar() {
         initComponents();
         this.setExtendedState(MAXIMIZED_BOTH);
-
         StyledDocument doc = txtOutput.getStyledDocument();
         SimpleAttributeSet center = new SimpleAttributeSet();
         StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
         doc.setParagraphAttributes(0, doc.getLength(), center, false);
         txtOutput.setDisabledTextColor(Color.BLACK);
-
-//      JIKA HASIL BARCODE SCANNER TIDAK MENGANDUNG KEY CODE ENTER
-        this.addKeyListener(new KeyAdapter() {
-            public void keyReleased(KeyEvent k) {
-                barcode.append(k.getKeyChar());
-                if (barcode.length() == 16) {
-                    tkt = new queryTicket().getData(barcode.toString());
-                    showDataTicket(barcode.toString());
-                    if (checkExpiredTime() == 1) {
-                        txtbarcode.setText(barcode.toString());
-                        txtOutput.setText("Scan Berhasil\n \nSaat ini anda sudah melewati batas waktu untuk keluar, silahkan bayar kelebihan biaya pada staf parkir terdekat");
-                        barcode.delete(0, barcode.length());
-                    } else if (checkExpiredTime() == 2) {
-                        txtbarcode.setText(barcode.toString());
-                        txtOutput.setText("Scan Berhasil\n \nTerima kasih");
-                        barcode.delete(0, barcode.length());
-                    } else {
-                        txtbarcode.setText(barcode.toString());
-                        txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
-                        barcode.delete(0, barcode.length());
-                    }
-                    showImage();
-                } else if (k.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    clearInfo();
-                }
-            }
-        });
-
-//        JIKA HASIL SCAN DARI BARCODE READER MENGANDUNG KEY CODE "ENTER", GUNAKAN CODE DIBAWAH
-//        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
-//            @Override
-//            public boolean dispatchKeyEvent(KeyEvent e) {
-//                if (e.getID() != KeyEvent.KEY_RELEASED) {
-//                    return false;
-//                }
-//                
-//                if (e.getWhen() - lastEventTimeStamp > THRESHOLD) {
-//                    barcode.delete(0, barcode.length());
-//                }
-//                
-//                lastEventTimeStamp = e.getWhen();
-//                
-//                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-//                    if (barcode.length() >= MIN_BARCODE_LENGTH) {
-//                        clearInfo();
-//                        getDataTicket(barcode.toString());
-//                        if (checkExpiredTime() == 1) {
-//                            txtbarcode.setText(barcode.toString());
-//                            txtOutput.setText("Scan Berhasil\n \nSaat ini anda sudah melewati batas waktu untuk keluar, silahkan bayar kelebihan biaya pada staf parkir terdekat");
-//                        } else if (checkExpiredTime() == 2) {
-//                            txtbarcode.setText(barcode.toString());
-//                            txtOutput.setText("Scan Berhasil\n \nTerima kasih");
-//                        } else {
-//                            txtbarcode.setText(barcode.toString());
-//                            txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
-//                        }
-//                        showImage();
-//                    }
-//                    barcode.delete(0, barcode.length());
-//                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-//                    clearInfo();
-//                } else {
-//                    barcode.append(e.getKeyChar());
-//                }
-//                return false;
-//            }
-//        });
+        //Barcode Listener
+        barcodeListener();
+        //RFID Listener
+        ThreadRFID card = new ThreadRFID();
+        card.start();
     }
 
-    private void showImage() {
+    private void showImage(String filePath) {
         BufferedImage image1 = null;
         BufferedImage image2 = null;
         Image cam1 = null;
         Image cam2 = null;
         String errorCode = "";
-        try {
-            URL url1 = new URL("http://192.168.43.149/giantlab/" + tkt.getBarcode() + "_1.jpg");
-            URL url2 = new URL("http://192.168.43.149/giantlab/" + tkt.getBarcode() + "_2.jpg");
-            image1 = ImageIO.read(url1);
-            image2 = ImageIO.read(url2);
-            cam1 = image1.getScaledInstance(labelCam1.getWidth(), labelCam1.getHeight(), Image.SCALE_SMOOTH);
-            cam2 = image2.getScaledInstance(labelCam1.getWidth(), labelCam1.getHeight(), Image.SCALE_SMOOTH);
-            labelCam1.setIcon(new ImageIcon(cam1));
-            labelCam2.setIcon(new ImageIcon(cam2));
-        } catch (IOException exp) {
-            errorCode = "Gambar Tidak Ditemukan";
+        if (!filePath.equals("")) {
+            try {
+                image1 = ImageIO.read(new File(filePath));
+                image2 = ImageIO.read(new File(filePath));
+                cam1 = image1.getScaledInstance(labelCam1.getWidth(), labelCam1.getHeight(), Image.SCALE_SMOOTH);
+                cam2 = image2.getScaledInstance(labelCam1.getWidth(), labelCam1.getHeight(), Image.SCALE_SMOOTH);
+                labelCam1.setIcon(new ImageIcon(cam1));
+                labelCam2.setIcon(new ImageIcon(cam2));
+            } catch (IOException exp) {
+                errorCode = "Gambar Tidak Ditemukan";
 
-        }
-        if (errorCode.equalsIgnoreCase("gambar tidak ditemukan")) {
-            labelCam1.setText(errorCode);
-            labelCam2.setText(errorCode);
-        }else{
-            labelCam1.setText("");
-            labelCam2.setText("");
+            }
+            if (errorCode.equalsIgnoreCase("gambar tidak ditemukan")) {
+                labelCam1.setText(errorCode);
+                labelCam2.setText(errorCode);
+            } else {
+                labelCam1.setText("");
+                labelCam2.setText("");
+            }
+        } else {
+            labelCam1.setText("Gambar Tidak Ditemukan");
+            labelCam2.setText("Gambar Tidak Ditemukan");
         }
 
     }
@@ -213,7 +163,8 @@ public class PintuKeluar extends javax.swing.JFrame {
     }
 
     private void getPic(String ip) throws Exception {
-        String urlip = "http://" + ip + "/cgi-bin/snapshot.cgi";
+//        String urlip = "http://" + ip + "/cgi-bin/snapshot.cgi";
+        String urlip = "http://" + ip + "/giantlab/" + tkt.getBarcode() + "_1.jpg";
         URL url = new URL(urlip);
         HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
         String basicAuth = "Basic " + new String(Base64.encodeBase64("admin:admin".getBytes())); //jangan kesini buat ambil dari server
@@ -237,7 +188,7 @@ public class PintuKeluar extends javax.swing.JFrame {
             //System.out.println("fileName = " + fileName);
             InputStream inputStream = httpConn.getInputStream();
             String saveFilePath = Params.pathFoto + File.separator + fileName;
-
+            System.out.println(saveFilePath);
             FileOutputStream outputStream = new FileOutputStream(saveFilePath);
 
             int bytesRead = -1;
@@ -250,8 +201,10 @@ public class PintuKeluar extends javax.swing.JFrame {
             inputStream.close();
 
             System.out.println("File downloaded");
+            showImage(saveFilePath);
         } else {
             System.out.println("No file to download. Server replied HTTP code: " + responseCode);
+            showImage("");
         }
         httpConn.disconnect();
 
@@ -320,6 +273,11 @@ public class PintuKeluar extends javax.swing.JFrame {
         txtbarcode.setFont(new java.awt.Font("Tahoma", 1, 30)); // NOI18N
         txtbarcode.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         txtbarcode.setText("Scan tiket terlebih dahulu ...");
+        txtbarcode.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                txtbarcodePropertyChange(evt);
+            }
+        });
 
         javax.swing.GroupLayout panelScanLayout = new javax.swing.GroupLayout(panelScan);
         panelScan.setLayout(panelScanLayout);
@@ -391,7 +349,6 @@ public class PintuKeluar extends javax.swing.JFrame {
 
         txtOutput.setEditable(false);
         txtOutput.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
-        txtOutput.setText("Hello World");
         txtOutput.setFocusable(false);
         jScrollPane1.setViewportView(txtOutput);
 
@@ -461,6 +418,10 @@ public class PintuKeluar extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void txtbarcodePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_txtbarcodePropertyChange
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtbarcodePropertyChange
+
     /**
      * @param args the command line arguments
      */
@@ -516,6 +477,87 @@ public class PintuKeluar extends javax.swing.JFrame {
     private javax.swing.JLabel txtJamMasuk;
     private javax.swing.JLabel txtNoPol;
     private javax.swing.JTextPane txtOutput;
-    private javax.swing.JLabel txtbarcode;
+    public javax.swing.JLabel txtbarcode;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void barcodeListener() {
+        //JIKA HASIL BARCODE SCANNER TIDAK MENGANDUNG KEY CODE ENTER
+        this.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent k) {
+                barcode.append(k.getKeyChar());
+                if (barcode.length() == 16) {
+                    try {
+                        tkt = new queryTicket().getData(barcode.toString());
+                        showDataTicket(barcode.toString());
+                        if (checkExpiredTime() == 1) {
+                            txtbarcode.setText(barcode.toString());
+                            txtOutput.setText("Scan Berhasil\n \nSaat ini anda sudah melewati batas waktu untuk keluar, silahkan bayar kelebihan biaya pada staf parkir terdekat");
+                            barcode.delete(0, barcode.length());
+                        } else if (checkExpiredTime() == 2) {
+                            txtbarcode.setText(barcode.toString());
+                            txtOutput.setText("Scan Berhasil\n \nTerima kasih");
+                            barcode.delete(0, barcode.length());
+                        } else {
+                            txtbarcode.setText(barcode.toString());
+                            txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
+                            barcode.delete(0, barcode.length());
+                        }
+//                    showImage("192.168.43.149");
+                        getPic("192.168.43.149");
+                        getPic("192.168.43.149");
+                    } catch (Exception ex) {
+                        Logger.getLogger(PintuKeluar.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } else if (k.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    clearInfo();
+                }
+            }
+        });
+
+//        JIKA HASIL SCAN DARI BARCODE READER MENGANDUNG KEY CODE "ENTER", GUNAKAN CODE DIBAWAH
+//        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+//            @Override
+//            public boolean dispatchKeyEvent(KeyEvent e) {
+//                if (e.getID() != KeyEvent.KEY_RELEASED) {
+//                    return false;
+//                }
+//                
+//                if (e.getWhen() - lastEventTimeStamp > THRESHOLD) {
+//                    barcode.delete(0, barcode.length());
+//                }
+//                
+//                lastEventTimeStamp = e.getWhen();
+//                
+//                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+//                    if (barcode.length() >= MIN_BARCODE_LENGTH) {
+//                        clearInfo();
+//                        getDataTicket(barcode.toString());
+//                        if (checkExpiredTime() == 1) {
+//                            txtbarcode.setText(barcode.toString());
+//                            txtOutput.setText("Scan Berhasil\n \nSaat ini anda sudah melewati batas waktu untuk keluar, silahkan bayar kelebihan biaya pada staf parkir terdekat");
+//                        } else if (checkExpiredTime() == 2) {
+//                            txtbarcode.setText(barcode.toString());
+//                            txtOutput.setText("Scan Berhasil\n \nTerima kasih");
+//                        } else {
+//                            txtbarcode.setText(barcode.toString());
+//                            txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
+//                        }
+//                        showImage();
+//                    }
+//                    barcode.delete(0, barcode.length());
+//                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+//                    clearInfo();
+//                } else {
+//                    barcode.append(e.getKeyChar());
+//                }
+//                return false;
+//            }
+//        });
+    }
+    
+    @Override
+    public void cardListener() {
+        nfc.checkCard();
+    }
 }

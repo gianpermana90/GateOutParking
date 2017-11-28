@@ -163,6 +163,12 @@
                 <Property name="horizontalAlignment" type="int" value="0"/>
                 <Property name="text" type="java.lang.String" value="Scan tiket terlebih dahulu ..."/>
               </Properties>
+              <Events>
+                <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="txtbarcodePropertyChange"/>
+              </Events>
+              <AuxValues>
+                <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+              </AuxValues>
             </Component>
           </SubComponents>
         </Container>
@@ -300,7 +306,6 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Tahoma" size="36" style="1"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Hello World"/>
                     <Property name="focusable" type="boolean" value="false"/>
                   </Properties>
                 </Component>

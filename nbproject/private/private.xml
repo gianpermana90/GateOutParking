@@ -3,8 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/GateOut/ACR120CardTerminal.java</file>
-            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/GateOut/RFIDreader.java</file>
+            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/config/Params.java</file>
+            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/ACR122U/JacspcscLoader.java</file>
+            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/db/Koneksi.java</file>
+            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/ACR122U/Reader.java</file>
+            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/ACR122U/mainMifareProg.java</file>
             <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/GateOut/PintuKeluar.java</file>
         </group>
     </open-files>
