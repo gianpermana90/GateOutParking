@@ -54,8 +54,8 @@ public class queryTicket {
         }catch(SQLException e){   
             String errorCode = e.toString();
             if(errorCode.contains("can not be represented as java.sql.Timestamp")){
-                System.out.println(errorCode);
-                System.out.println("There is no payment process has not been made for this barcode");
+//                System.out.println(errorCode);
+                System.out.println("There is no payment process that has been made for this barcode");
             }else{
                 Logger.getLogger(queryTicket.class.getName()).log(Level.SEVERE, null, e);
             }

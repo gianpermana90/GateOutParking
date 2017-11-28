@@ -9,17 +9,14 @@ package db;
  * @author rakha
  */
 
+import config.Params;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
 public class Koneksi {
     private Connection con;
     private String driver = "com.mysql.jdbc.Driver";
-//    private String url = "jdbc:mysql://localhost:3306/hexapark"; // nama database
-//    private String username = "root";// user name dbms
-//    private String password = "";// pswd dbms
-//    private String driver = "com.mysql.jdbc.Driver";
-    private String url = "jdbc:mysql://192.168.43.149:3306/hexapark"; // nama database
+    private String url = Params.DBurl; // url + nama database
     private String username = "root";// user name dbms
     private String password = "";// pswd dbms
     

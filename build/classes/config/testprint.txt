@@ -1,9 +1,0 @@
-    TANDA BUKTI PEMBAYARAN PARKIR    
- Nomor Polisi :   BG 765 U/MOBIL   
- POS Masuk    :      
- Waktu Masuk  :   2017-09-03 12:29:41   
- POS Masuk    :      
- POS Keluar   :   Pos Keluar 8   
- Waktu Keluar :   04-09-2017 00:17:51   
- Nomor Karcis :   0021504416579055   
- Total Biaya  :   Rp.38.000,00   

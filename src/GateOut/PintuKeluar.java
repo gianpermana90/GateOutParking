@@ -49,7 +49,7 @@ import org.apache.commons.codec.binary.Base64;
  *
  * @author Hades
  */
-public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, readerRFID{
+public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, readerRFID {
 
     /**
      * Creates new form PintuKeluar
@@ -65,12 +65,16 @@ public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, re
     SimpleDateFormat formatTime = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
     //initial for get picture
     private static final int BUFFER_SIZE = 4096;
+    private String saveFilePath;
     //initial for RFID
-    RFID nfc = new RFID();
+    //Scanner mode
+    private int scannerMode = Params.ScannerMode;
 
     public PintuKeluar() {
         initComponents();
+        //Set Maximum Width and Height UI
         this.setExtendedState(MAXIMIZED_BOTH);
+        //Set Format Text Area
         StyledDocument doc = txtOutput.getStyledDocument();
         SimpleAttributeSet center = new SimpleAttributeSet();
         StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
@@ -79,38 +83,71 @@ public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, re
         //Barcode Listener
         barcodeListener();
         //RFID Listener
-        ThreadRFID card = new ThreadRFID();
-        card.start();
+//        ThreadRFID card = new ThreadRFID();
+//        card.start();
     }
 
-    private void showImage(String filePath) {
+    private void getPic(String ip) throws Exception {
+//        String urlip = "http://" + ip + "/cgi-bin/snapshot.cgi";
+        String urlip = "http://" + ip + "/giantlab/" + tkt.getBarcode() + "_1.jpg";
+        URL url = new URL(urlip);
+        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+        String basicAuth = "Basic " + new String(Base64.encodeBase64("admin:admin".getBytes())); //jangan kesini buat ambil dari server
+        httpConn.setRequestProperty("Authorization", basicAuth); //jangan kesini buat ambil dari server
+        //System.out.println("Basic Out "+basicAuth); //jangan kesini buat ambil dari server
+        //httpConn.setRequestMethod("GET");
+        //httpConn.setDoOutput(true);
+        int responseCode = httpConn.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            String fileName = "";
+            String disposition = httpConn.getHeaderField("Content-Disposition");
+            String contentType = httpConn.getContentType();
+            int contentLength = httpConn.getContentLength();
+            fileName = ip + tkt.getBarcode() + ".jpg";
+            //System.out.println("Content-Type = " + contentType);
+            //System.out.println("Content-Disposition = " + disposition);
+            //System.out.println("Content-Length = " + contentLength);
+            //System.out.println("fileName = " + fileName);
+            InputStream inputStream = httpConn.getInputStream();
+            saveFilePath = Params.pathFoto + File.separator + fileName;
+//            System.out.println(saveFilePath);
+            FileOutputStream outputStream = new FileOutputStream(saveFilePath);
+            int bytesRead = -1;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            outputStream.close();
+            inputStream.close();
+            System.out.println("File downloaded");
+        } else {
+            System.out.println("No file to download. Server replied HTTP code: " + responseCode);
+            saveFilePath = "";
+        }
+        httpConn.disconnect();
+    }
+
+    private void showImage(String filePath, JLabel labelCam1) {
         BufferedImage image1 = null;
-        BufferedImage image2 = null;
         Image cam1 = null;
-        Image cam2 = null;
         String errorCode = "";
         if (!filePath.equals("")) {
             try {
                 image1 = ImageIO.read(new File(filePath));
-                image2 = ImageIO.read(new File(filePath));
                 cam1 = image1.getScaledInstance(labelCam1.getWidth(), labelCam1.getHeight(), Image.SCALE_SMOOTH);
-                cam2 = image2.getScaledInstance(labelCam1.getWidth(), labelCam1.getHeight(), Image.SCALE_SMOOTH);
                 labelCam1.setIcon(new ImageIcon(cam1));
-                labelCam2.setIcon(new ImageIcon(cam2));
             } catch (IOException exp) {
                 errorCode = "Gambar Tidak Ditemukan";
-
             }
             if (errorCode.equalsIgnoreCase("gambar tidak ditemukan")) {
                 labelCam1.setText(errorCode);
-                labelCam2.setText(errorCode);
+                labelCam1.setIcon(null);
             } else {
                 labelCam1.setText("");
-                labelCam2.setText("");
             }
         } else {
             labelCam1.setText("Gambar Tidak Ditemukan");
-            labelCam2.setText("Gambar Tidak Ditemukan");
+            labelCam1.setIcon(null);
         }
 
     }
@@ -135,9 +172,9 @@ public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, re
                 result = 2;
             }
         } catch (ParseException ex) {
-            Logger.getLogger(gateOut.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(PintuKeluar.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NullPointerException e) {
-            System.out.println("Pembayaran Belum Dilakukan");
+//            System.out.println("Pembayaran Belum Dilakukan");
             result = 3;
         }
         return result;
@@ -162,52 +199,16 @@ public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, re
         txtNoPol.setText(tkt.getLicenseNumber());
     }
 
-    private void getPic(String ip) throws Exception {
-//        String urlip = "http://" + ip + "/cgi-bin/snapshot.cgi";
-        String urlip = "http://" + ip + "/giantlab/" + tkt.getBarcode() + "_1.jpg";
-        URL url = new URL(urlip);
-        HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-        String basicAuth = "Basic " + new String(Base64.encodeBase64("admin:admin".getBytes())); //jangan kesini buat ambil dari server
-        httpConn.setRequestProperty("Authorization", basicAuth); //jangan kesini buat ambil dari server
-        //System.out.println("Basic Out "+basicAuth); //jangan kesini buat ambil dari server
-        //httpConn.setRequestMethod("GET");
-        //httpConn.setDoOutput(true);
-        int responseCode = httpConn.getResponseCode();
-
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            String fileName = "";
-            String disposition = httpConn.getHeaderField("Content-Disposition");
-            String contentType = httpConn.getContentType();
-            int contentLength = httpConn.getContentLength();
-
-            fileName = ip + ".jpg";
-
-            //System.out.println("Content-Type = " + contentType);
-            //System.out.println("Content-Disposition = " + disposition);
-            //System.out.println("Content-Length = " + contentLength);
-            //System.out.println("fileName = " + fileName);
-            InputStream inputStream = httpConn.getInputStream();
-            String saveFilePath = Params.pathFoto + File.separator + fileName;
-            System.out.println(saveFilePath);
-            FileOutputStream outputStream = new FileOutputStream(saveFilePath);
-
-            int bytesRead = -1;
-            byte[] buffer = new byte[BUFFER_SIZE];
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            outputStream.close();
-            inputStream.close();
-
-            System.out.println("File downloaded");
-            showImage(saveFilePath);
-        } else {
-            System.out.println("No file to download. Server replied HTTP code: " + responseCode);
-            showImage("");
+    private void getDataTicket(String code) {
+        try {
+            tkt = new queryTicket().getData(code);
+            txtGate.setText(Integer.toString(tkt.getEntranceGate()));
+            txtJamMasuk.setText(tkt.getEntranceTime());
+            txtJamBayar.setText(tkt.getPaymentTime());
+            txtNoPol.setText(tkt.getLicenseNumber());
+        } catch (Exception e) {
+            System.out.println("Ada Error");
         }
-        httpConn.disconnect();
-
     }
 
     /**
@@ -482,82 +483,87 @@ public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, re
 
     @Override
     public void barcodeListener() {
-        //JIKA HASIL BARCODE SCANNER TIDAK MENGANDUNG KEY CODE ENTER
-        this.addKeyListener(new KeyAdapter() {
-            public void keyReleased(KeyEvent k) {
-                barcode.append(k.getKeyChar());
-                if (barcode.length() == 16) {
-                    try {
-                        tkt = new queryTicket().getData(barcode.toString());
-                        showDataTicket(barcode.toString());
-                        if (checkExpiredTime() == 1) {
-                            txtbarcode.setText(barcode.toString());
-                            txtOutput.setText("Scan Berhasil\n \nSaat ini anda sudah melewati batas waktu untuk keluar, silahkan bayar kelebihan biaya pada staf parkir terdekat");
-                            barcode.delete(0, barcode.length());
-                        } else if (checkExpiredTime() == 2) {
-                            txtbarcode.setText(barcode.toString());
-                            txtOutput.setText("Scan Berhasil\n \nTerima kasih");
-                            barcode.delete(0, barcode.length());
-                        } else {
-                            txtbarcode.setText(barcode.toString());
-                            txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
-                            barcode.delete(0, barcode.length());
+        if (scannerMode == 1) {
+            //JIKA HASIL BARCODE SCANNER TIDAK MENGANDUNG KEY CODE ENTER
+            this.addKeyListener(new KeyAdapter() {
+                public void keyReleased(KeyEvent k) {
+                    barcode.append(k.getKeyChar());
+                    if (barcode.length() == 16) {
+                        try {
+                            tkt = new queryTicket().getData(barcode.toString());
+                            showDataTicket(barcode.toString());
+                            if (checkExpiredTime() == 1) {
+                                txtbarcode.setText(barcode.toString());
+                                txtOutput.setText("Scan Berhasil\n \nSaat ini anda sudah melewati batas waktu untuk keluar, silahkan bayar kelebihan biaya pada staf parkir terdekat");
+                                barcode.delete(0, barcode.length());
+                            } else if (checkExpiredTime() == 2) {
+                                txtbarcode.setText(barcode.toString());
+                                txtOutput.setText("Scan Berhasil\n \nTerima kasih");
+                                barcode.delete(0, barcode.length());
+                            } else {
+                                txtbarcode.setText(barcode.toString());
+                                txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
+                                barcode.delete(0, barcode.length());
+                            }
+                            getPic("192.168.43.149");
+                            showImage(saveFilePath, labelCam1);
+                            showImage(saveFilePath, labelCam2);
+                        } catch (Exception ex) {
+                            Logger.getLogger(PintuKeluar.class.getName()).log(Level.SEVERE, null, ex);
                         }
-//                    showImage("192.168.43.149");
-                        getPic("192.168.43.149");
-                        getPic("192.168.43.149");
-                    } catch (Exception ex) {
-                        Logger.getLogger(PintuKeluar.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else if (k.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    clearInfo();
-                }
-            }
-        });
+                    } else if (k.getKeyCode() == KeyEvent.VK_F3) {
 
-//        JIKA HASIL SCAN DARI BARCODE READER MENGANDUNG KEY CODE "ENTER", GUNAKAN CODE DIBAWAH
-//        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
-//            @Override
-//            public boolean dispatchKeyEvent(KeyEvent e) {
-//                if (e.getID() != KeyEvent.KEY_RELEASED) {
-//                    return false;
-//                }
-//                
-//                if (e.getWhen() - lastEventTimeStamp > THRESHOLD) {
-//                    barcode.delete(0, barcode.length());
-//                }
-//                
-//                lastEventTimeStamp = e.getWhen();
-//                
-//                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-//                    if (barcode.length() >= MIN_BARCODE_LENGTH) {
-//                        clearInfo();
-//                        getDataTicket(barcode.toString());
-//                        if (checkExpiredTime() == 1) {
-//                            txtbarcode.setText(barcode.toString());
-//                            txtOutput.setText("Scan Berhasil\n \nSaat ini anda sudah melewati batas waktu untuk keluar, silahkan bayar kelebihan biaya pada staf parkir terdekat");
-//                        } else if (checkExpiredTime() == 2) {
-//                            txtbarcode.setText(barcode.toString());
-//                            txtOutput.setText("Scan Berhasil\n \nTerima kasih");
-//                        } else {
-//                            txtbarcode.setText(barcode.toString());
-//                            txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
-//                        }
-//                        showImage();
-//                    }
-//                    barcode.delete(0, barcode.length());
-//                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-//                    clearInfo();
-//                } else {
-//                    barcode.append(e.getKeyChar());
-//                }
-//                return false;
-//            }
-//        });
+                    } else if (k.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                        clearInfo();
+                    }
+                }
+            });
+        } else {
+            //JIKA HASIL SCAN DARI BARCODE READER MENGANDUNG KEY CODE "ENTER", GUNAKAN CODE DIBAWAH
+            KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+                @Override
+                public boolean dispatchKeyEvent(KeyEvent e) {
+                    if (e.getID() != KeyEvent.KEY_RELEASED) {
+                        return false;
+                    }
+
+                    if (e.getWhen() - lastEventTimeStamp > THRESHOLD) {
+                        barcode.delete(0, barcode.length());
+                    }
+
+                    lastEventTimeStamp = e.getWhen();
+
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        if (barcode.length() >= MIN_BARCODE_LENGTH) {
+                            clearInfo();
+                            getDataTicket(barcode.toString());
+                            if (checkExpiredTime() == 1) {
+                                txtbarcode.setText(barcode.toString());
+                                txtOutput.setText("Scan Berhasil\n \nSaat ini anda sudah melewati batas waktu untuk keluar, silahkan bayar kelebihan biaya pada staf parkir terdekat");
+                            } else if (checkExpiredTime() == 2) {
+                                txtbarcode.setText(barcode.toString());
+                                txtOutput.setText("Scan Berhasil\n \nTerima kasih");
+                            } else {
+                                txtbarcode.setText(barcode.toString());
+                                txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
+                            }
+                            showImage("", labelCam1);
+                        }
+                        barcode.delete(0, barcode.length());
+                    } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                        clearInfo();
+                    } else {
+                        barcode.append(e.getKeyChar());
+                    }
+                    return false;
+                }
+            });
+        }
+
     }
-    
+
     @Override
     public void cardListener() {
-        nfc.checkCard();
+
     }
 }
