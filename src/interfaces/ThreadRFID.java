@@ -15,17 +15,26 @@ import java.util.logging.Logger;
  * @author Hades
  */
 public class ThreadRFID extends Thread {
-    
+
     private PintuKeluar ui;
     private RFID card = new RFID();
-    
+    private int memberID;
+
+    public ThreadRFID(PintuKeluar ui) {
+        this.ui = ui;
+    }
+//UNDER DEVELOPMENT
     @Override
-    public void run(){
-        while(true){
+    public void run() {
+        int stat = 0;
+        while (true) {
             try {
-                int stat = card.checkCard();
-                if(stat != 0){
-                    System.out.println("Ada Card");
+                stat = card.checkCard();
+                if (stat != 0) {
+                    ui.txtbarcode.setText("Member");
+                    memberID = card.readValueTAG(9);
+                    System.out.println(memberID);
+                    ui.getDataMember(memberID);
                 }
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {

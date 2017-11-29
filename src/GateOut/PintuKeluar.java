@@ -5,6 +5,7 @@
  */
 package GateOut;
 
+import cls.Member;
 import cls.RFID;
 import cls.Ticket;
 import org.nfctools.mf.MfCardListener;
@@ -59,16 +60,20 @@ public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, re
     private static final int MIN_BARCODE_LENGTH = 8;
     private final StringBuffer barcode = new StringBuffer();
     private long lastEventTimeStamp = 0L;
-    //tiket
+    //tiket & member
     private Ticket tkt = new Ticket();
+    private Member mbr = new Member();
     //format date
     SimpleDateFormat formatTime = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
     //initial for get picture
     private static final int BUFFER_SIZE = 4096;
     private String saveFilePath;
     //initial for RFID
+    public int MemberID = 0;
     //Scanner mode
     private int scannerMode = Params.ScannerMode;
+    //Thread RFID Scanner
+    private ThreadRFID card = new ThreadRFID(this);
 
     public PintuKeluar() {
         initComponents();
@@ -83,8 +88,7 @@ public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, re
         //Barcode Listener
         barcodeListener();
         //RFID Listener
-//        ThreadRFID card = new ThreadRFID();
-//        card.start();
+        card.start();
     }
 
     private void getPic(String ip) throws Exception {
@@ -178,6 +182,11 @@ public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, re
             result = 3;
         }
         return result;
+    }
+    
+    public void getDataMember(int memberID){
+        mbr = new queryTicket().getMemberDetails(memberID);
+        txtNoPol.setText(mbr.getLicenseNumber());
     }
 
     private void clearInfo() {
