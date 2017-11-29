@@ -6,7 +6,7 @@
 package GateOut;
 
 import cls.Member;
-import cls.RFID;
+import rfid.RFIDcommand;
 import cls.Ticket;
 import org.nfctools.mf.MfCardListener;
 import org.nfctools.spi.acs.Acr122ReaderWriter;
@@ -14,7 +14,7 @@ import org.nfctools.spi.acs.AcsTerminal;
 import org.nfctools.utils.CardTerminalUtils;
 import config.Params;
 import db.queryTicket;
-import interfaces.ThreadRFID;
+import rfid.ThreadRFID;
 import interfaces.readerBarcode;
 import interfaces.readerRFID;
 import java.awt.AWTException;
@@ -50,7 +50,7 @@ import org.apache.commons.codec.binary.Base64;
  *
  * @author Hades
  */
-public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, readerRFID {
+public class GateOut extends javax.swing.JFrame implements readerBarcode, readerRFID {
 
     /**
      * Creates new form PintuKeluar
@@ -68,14 +68,13 @@ public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, re
     //initial for get picture
     private static final int BUFFER_SIZE = 4096;
     private String saveFilePath;
-    //initial for RFID
-    public int MemberID = 0;
     //Scanner mode
     private int scannerMode = Params.ScannerMode;
     //Thread RFID Scanner
     private ThreadRFID card = new ThreadRFID(this);
+    public int MemberID = 0;
 
-    public PintuKeluar() {
+    public GateOut() {
         initComponents();
         //Set Maximum Width and Height UI
         this.setExtendedState(MAXIMIZED_BOTH);
@@ -176,7 +175,7 @@ public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, re
                 result = 2;
             }
         } catch (ParseException ex) {
-            Logger.getLogger(PintuKeluar.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GateOut.class.getName()).log(Level.SEVERE, null, ex);
         } catch (NullPointerException e) {
 //            System.out.println("Pembayaran Belum Dilakukan");
             result = 3;
@@ -449,20 +448,21 @@ public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, re
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(PintuKeluar.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GateOut.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(PintuKeluar.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GateOut.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(PintuKeluar.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GateOut.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(PintuKeluar.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(GateOut.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new PintuKeluar().setVisible(true);
+                new GateOut().setVisible(true);
             }
         });
     }
@@ -518,7 +518,7 @@ public class PintuKeluar extends javax.swing.JFrame implements readerBarcode, re
                             showImage(saveFilePath, labelCam1);
                             showImage(saveFilePath, labelCam2);
                         } catch (Exception ex) {
-                            Logger.getLogger(PintuKeluar.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(GateOut.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     } else if (k.getKeyCode() == KeyEvent.VK_F3) {
 

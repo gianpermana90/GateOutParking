@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cls;
+package rfid;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -22,7 +22,7 @@ import org.nfctools.spi.acs.Acr122ReaderWriter;
  *
  * @author Hades
  */
-public class RFID {
+public class RFIDcommand {
     
     private Acr122ReaderWriter readerWriter;
 
@@ -30,7 +30,7 @@ public class RFID {
     private CardChannel channel;
     CardTerminal terminal;
 
-    public RFID() {
+    public RFIDcommand() {
         this.factory = TerminalFactory.getDefault();;
         initTerminal();
     }
@@ -39,7 +39,7 @@ public class RFID {
         int res = 0;
         try {
 //            System.out.println(terminal.connect("*"));
-            terminal.connect("*");
+            terminal.connect("*"); //All kind Terminal (sepertinya)
             res = 1;
         } catch (CardException ex) {
             //Logger.getLogger(RFID.class.getName()).log(Level.SEVERE, null, ex);

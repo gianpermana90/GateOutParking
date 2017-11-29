@@ -30,7 +30,7 @@ public class queryTicket {
 
     public Ticket getData(String barcode) {
         Ticket res = new Ticket();
-        Koneksi connect = new Koneksi();
+        DBConnection connect = new DBConnection();
         Connection con = connect.logOn();
         String query = "select * from parkingtrx where trxid = '" + barcode + "'";
         try {
@@ -69,7 +69,7 @@ public class queryTicket {
 
     public int updatePolNum(String idTicket, String number) {
         int res = 0;
-        Koneksi conn = new Koneksi();
+        DBConnection conn = new DBConnection();
         Connection con = conn.logOn();
         String query = "update parkingtrx set numberplate = '" + number + "' where trxid = '" + idTicket + "'";
         try {
@@ -85,7 +85,7 @@ public class queryTicket {
 
     public int insertExitDate(String barcode, String date) {
         int res = 0;
-        Koneksi conn = new Koneksi();
+        DBConnection conn = new DBConnection();
         Connection con = conn.logOn();
         String query = "UPDATE parkingtrx set exittime = '" + date + "' where trxid = '" + barcode + "'";
         try {
@@ -100,7 +100,7 @@ public class queryTicket {
 
     public Member getMemberDetails(int memberID) {
         Member res = new Member();
-        Koneksi connect = new Koneksi();
+        DBConnection connect = new DBConnection();
         Connection con = connect.logOn();
         //Get Data Member
         String queryGetMember = "select b.nopol, a.mdalamat, a.mdnama, a.mdid FROM memberdetails a, membernopol b where b.memberid = " + memberID + " and a.mdid = b.memberid";

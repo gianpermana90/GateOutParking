@@ -13,7 +13,7 @@ import config.Params;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-public class Koneksi {
+public class DBConnection {
     private Connection con;
     private String driver = "com.mysql.jdbc.Driver";
     private String url = Params.DBurl; // url + nama database

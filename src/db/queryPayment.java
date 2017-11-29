@@ -31,7 +31,7 @@ public class queryPayment {
     public int[] getPriceInfo(Ticket pym) {
         int[] res = new int[4];
         String query = "select * from tariff where types = '" + pym.getTarifTypes()+ "';";
-        Koneksi connect = new Koneksi();
+        DBConnection connect = new DBConnection();
         Connection con = connect.logOn();
         try {
             Statement stm = con.createStatement();
@@ -91,7 +91,7 @@ public class queryPayment {
     
     public String cekMember(String licenseNum){
         String res = "";
-        Koneksi connect = new Koneksi();
+        DBConnection connect = new DBConnection();
         Connection con = connect.logOn();
         String query = "select * from membernopol where nopol = '" + licenseNum + "'";
         try {
