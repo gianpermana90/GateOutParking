@@ -17,6 +17,7 @@ import javax.smartcardio.CommandAPDU;
 import javax.smartcardio.ResponseAPDU;
 import javax.smartcardio.TerminalFactory;
 import org.nfctools.spi.acs.Acr122ReaderWriter;
+import org.nfctools.utils.CardTerminalUtils;
 
 /**
  *
@@ -26,12 +27,10 @@ public class RFIDcommand {
     
     private Acr122ReaderWriter readerWriter;
 
-    private TerminalFactory factory;
     private CardChannel channel;
     CardTerminal terminal;
 
     public RFIDcommand() {
-        this.factory = TerminalFactory.getDefault();;
         initTerminal();
     }
 
@@ -51,20 +50,9 @@ public class RFIDcommand {
     }
 
     public void initTerminal() {
-        try {
-            //save and show list of terminals
-            List<CardTerminal> terminals = factory.terminals().list();
-            System.out.println("Terminals : " + terminals);
-            //Use first terminal
-            terminal = terminals.get(0);
-            //Connect with the card
-
-        } catch (CardException ex) {
-            //Logger.getLogger(RFID.class.getName()).log(Level.SEVERE, null, ex);
-            if (ex.toString().contains("No card present")) {
-                System.out.println("No card present");
-            }
-        }
+        //Logger.getLogger(RFID.class.getName()).log(Level.SEVERE, null, ex);        
+        this.terminal = CardTerminalUtils.getTerminalByName("ACR122");
+        System.out.println("Device : " + terminal);
     }
 
     private void doAuth(int block) {

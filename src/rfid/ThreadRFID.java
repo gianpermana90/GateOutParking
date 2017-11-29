@@ -5,7 +5,7 @@
  */
 package rfid;
 
-import GateOut.GateOut;
+import PK.GateOut;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
