@@ -27,10 +27,13 @@ public class RFIDcommand {
     
     private Acr122ReaderWriter readerWriter;
 
+    private TerminalFactory factory;
     private CardChannel channel;
     CardTerminal terminal;
 
     public RFIDcommand() {
+        this.factory = TerminalFactory.getDefault();
+        //this.terminal = CardTerminalUtils.getTerminalByName("ACR122");
         initTerminal();
     }
 
@@ -38,7 +41,7 @@ public class RFIDcommand {
         int res = 0;
         try {
 //            System.out.println(terminal.connect("*"));
-            terminal.connect("*"); //All kind Terminal (sepertinya)
+            terminal.connect("*");
             res = 1;
         } catch (CardException ex) {
             //Logger.getLogger(RFID.class.getName()).log(Level.SEVERE, null, ex);
@@ -50,9 +53,20 @@ public class RFIDcommand {
     }
 
     public void initTerminal() {
-        //Logger.getLogger(RFID.class.getName()).log(Level.SEVERE, null, ex);        
-        this.terminal = CardTerminalUtils.getTerminalByName("ACR122");
-        System.out.println("Device : " + terminal);
+        try {
+            //save and show list of terminals
+            List<CardTerminal> terminals = factory.terminals().list();
+            System.out.println("Terminals : " + terminals);
+            //Use first terminal
+            terminal = terminals.get(0);
+            //Connect with the card
+
+        } catch (CardException ex) {
+            //Logger.getLogger(RFID.class.getName()).log(Level.SEVERE, null, ex);
+            if (ex.toString().contains("No card present")) {
+                System.out.println("No card present");
+            }
+        }
     }
 
     private void doAuth(int block) {
@@ -106,7 +120,8 @@ public class RFIDcommand {
         return hasil;
     }
 
-    public ResponseAPDU readTAG(int block) {
+    public String readTAG(int block) {
+        String hasil = "";
         ResponseAPDU result = null;
         doAuth(block);
         try {
@@ -121,8 +136,9 @@ public class RFIDcommand {
             //Logger.getLogger(RFID.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("Failed to read data !");
         }
-        System.out.println("Read Status : " + convertHexToString(bin2hex(result.getData())));
-        return result;
+//        System.out.println("Read Status : " + convertHexToString(bin2hex(result.getData())));
+        hasil = convertHexToString(bin2hex(result.getData()));
+        return hasil;
     }
 
     public ResponseAPDU writeValueTAG(int block, int[] value) {
@@ -144,7 +160,7 @@ public class RFIDcommand {
             //Logger.getLogger(RFID.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("Failed to write value data !");
         }
-        System.out.println("Write ValueStatus : " + result.toString());
+//        System.out.println("Write ValueStatus : " + result.toString());
         return result;
     }
 
@@ -179,12 +195,18 @@ public class RFIDcommand {
             //Logger.getLogger(RFID.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println("Failed to write data !");
         }
-        System.out.println("Write ValueStatus : " + result.toString());
+//        System.out.println("Write ValueStatus : " + result.toString());
         return result;
     }
 
     public String bin2hex(byte[] data) {
-        return String.format("%0" + (data.length * 2) + "X", new BigInteger(1, data));
+        String res = "";
+        try{
+            res = String.format("%0" + (data.length * 2) + "X", new BigInteger(1, data));
+        }catch(Exception e){
+            System.out.println("Coba Lagi");
+        }
+        return res;
     }
     
     public String convertHexToString(String hex){

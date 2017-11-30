@@ -16,8 +16,17 @@ public class Member {
     private String name;
     private String memberID;
     private String status;
+    private String expired;
 
     public Member() {
+    }
+
+    public String getExpired() {
+        return expired;
+    }
+
+    public void setExpired(String expired) {
+        this.expired = expired;
     }
 
     public String getStatus() {

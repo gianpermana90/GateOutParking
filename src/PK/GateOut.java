@@ -26,10 +26,12 @@ import java.awt.Robot;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
@@ -92,7 +94,7 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
 
     private void getPic(String ip) throws Exception {
 //        String urlip = "http://" + ip + "/cgi-bin/snapshot.cgi";
-        String urlip = "http://" + ip + "/giantlab/" + tkt.getBarcode() + "_1.jpg";
+        String urlip = "http://" + ip + "/giantlab/" + ip + ".jpg";
         URL url = new URL(urlip);
         HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
         String basicAuth = "Basic " + new String(Base64.encodeBase64("admin:admin".getBytes())); //jangan kesini buat ambil dari server
@@ -106,7 +108,7 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
             String disposition = httpConn.getHeaderField("Content-Disposition");
             String contentType = httpConn.getContentType();
             int contentLength = httpConn.getContentLength();
-            fileName = ip + tkt.getBarcode() + ".jpg";
+            fileName = ip + ".jpg";
             //System.out.println("Content-Type = " + contentType);
             //System.out.println("Content-Disposition = " + disposition);
             //System.out.println("Content-Length = " + contentLength);
@@ -155,6 +157,16 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
 
     }
 
+    private void showParkingPhotos() {
+        try {
+            getPic(Params.ipCam);
+        } catch (Exception ex) {
+            Logger.getLogger(GateOut.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        showImage(saveFilePath, labelCam1);
+        showImage(saveFilePath, labelCam2);
+    }
+
     private int checkExpiredTime() {
         int result = 1;
         SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -182,10 +194,36 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
         }
         return result;
     }
-    
-    public void getDataMember(int memberID){
+
+    public void getDataMember(int memberID, String expired, String parkDate, String parkTime) {
         mbr = new queryTicket().getMemberDetails(memberID);
+        mbr.setStatus(parkDate.replaceAll("\\s+", "") + " " + parkTime.replace("\\s+", ""));
+        mbr.setExpired(expired.replaceAll("\\s+", ""));
+        txtbarcode.setText(mbr.getName());
+        labelInfo1.setText("Jam Masuk");
+        txtJamMasuk.setText(mbr.getStatus());
+        labelInfo2.setText("Masa Berlaku");
+        txtGate.setText(mbr.getExpired());
+        labelInfo3.setText("Instansi");
+        txtJamBayar.setText(mbr.getInstansi());
+        labelInfo4.setText("Nomor Polisi");
         txtNoPol.setText(mbr.getLicenseNumber());
+        txtOutput.setText("Scan Berhasil\n \nTerima kasih");
+        showParkingPhotos();
+        openGate();
+    }
+
+    public void openGate() {
+        try {
+            Process p = Runtime.getRuntime().exec("python openGate.py");
+            String s = null;
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            while ((s = stdInput.readLine()) != null) {
+                System.out.println(s);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(GateOut.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void clearInfo() {
@@ -201,9 +239,13 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
 
     private void showDataTicket(String code) {
         clearInfo();
+        labelInfo1.setText("Jam Masuk");
         txtGate.setText(Integer.toString(tkt.getEntranceGate()));
+        labelInfo2.setText("Pintu Masuk");
         txtJamMasuk.setText(tkt.getEntranceTime());
+        labelInfo3.setText("Jam Bayar");
         txtJamBayar.setText(tkt.getPaymentTime());
+        labelInfo4.setText("Nomor Polisi");
         txtNoPol.setText(tkt.getLicenseNumber());
     }
 
@@ -235,19 +277,20 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
         txtbarcode = new javax.swing.JLabel();
         panelInfo = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
+        labelInfo1 = new javax.swing.JLabel();
         txtJamMasuk = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
+        labelInfo2 = new javax.swing.JLabel();
         txtGate = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
+        labelInfo3 = new javax.swing.JLabel();
         txtJamBayar = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
+        labelInfo4 = new javax.swing.JLabel();
         txtNoPol = new javax.swing.JLabel();
         panelOutput = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         txtOutput = new javax.swing.JTextPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setMaximumSize(new java.awt.Dimension(1366, 768));
         setUndecorated(true);
 
         panelBase.setBackground(new java.awt.Color(153, 153, 153));
@@ -268,7 +311,7 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
             panelFotoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelFotoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 633, Short.MAX_VALUE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 561, Short.MAX_VALUE)
                 .addContainerGap())
         );
         panelFotoLayout.setVerticalGroup(
@@ -281,7 +324,7 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
 
         txtbarcode.setFont(new java.awt.Font("Tahoma", 1, 30)); // NOI18N
         txtbarcode.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        txtbarcode.setText("Scan tiket terlebih dahulu ...");
+        txtbarcode.setText("-");
         txtbarcode.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
             public void propertyChange(java.beans.PropertyChangeEvent evt) {
                 txtbarcodePropertyChange(evt);
@@ -294,50 +337,84 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
             panelScanLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelScanLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtbarcode, javax.swing.GroupLayout.DEFAULT_SIZE, 570, Short.MAX_VALUE)
+                .addComponent(txtbarcode, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         panelScanLayout.setVerticalGroup(
             panelScanLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelScanLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtbarcode, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE)
+                .addComponent(txtbarcode, javax.swing.GroupLayout.DEFAULT_SIZE, 54, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
-        jPanel1.setLayout(new java.awt.GridLayout(4, 2));
+        jPanel1.setMaximumSize(new java.awt.Dimension(570, 316));
 
-        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 30)); // NOI18N
-        jLabel2.setText("Jam Masuk");
-        jPanel1.add(jLabel2);
+        labelInfo1.setFont(new java.awt.Font("Tahoma", 1, 28)); // NOI18N
+        labelInfo1.setText("-");
 
-        txtJamMasuk.setFont(new java.awt.Font("Tahoma", 1, 30)); // NOI18N
+        txtJamMasuk.setFont(new java.awt.Font("Tahoma", 1, 28)); // NOI18N
         txtJamMasuk.setText("-");
-        jPanel1.add(txtJamMasuk);
 
-        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 30)); // NOI18N
-        jLabel4.setText("Pintu Masuk");
-        jPanel1.add(jLabel4);
+        labelInfo2.setFont(new java.awt.Font("Tahoma", 1, 28)); // NOI18N
+        labelInfo2.setText("-");
 
-        txtGate.setFont(new java.awt.Font("Tahoma", 1, 30)); // NOI18N
+        txtGate.setFont(new java.awt.Font("Tahoma", 1, 28)); // NOI18N
         txtGate.setText("-");
-        jPanel1.add(txtGate);
 
-        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 30)); // NOI18N
-        jLabel6.setText("Jam Bayar");
-        jPanel1.add(jLabel6);
+        labelInfo3.setFont(new java.awt.Font("Tahoma", 1, 28)); // NOI18N
+        labelInfo3.setText("-");
 
-        txtJamBayar.setFont(new java.awt.Font("Tahoma", 1, 30)); // NOI18N
+        txtJamBayar.setFont(new java.awt.Font("Tahoma", 1, 28)); // NOI18N
         txtJamBayar.setText("-");
-        jPanel1.add(txtJamBayar);
 
-        jLabel8.setFont(new java.awt.Font("Tahoma", 1, 30)); // NOI18N
-        jLabel8.setText("Nomor Polisi");
-        jPanel1.add(jLabel8);
+        labelInfo4.setFont(new java.awt.Font("Tahoma", 1, 28)); // NOI18N
+        labelInfo4.setText("-");
 
-        txtNoPol.setFont(new java.awt.Font("Tahoma", 1, 30)); // NOI18N
+        txtNoPol.setFont(new java.awt.Font("Tahoma", 1, 28)); // NOI18N
         txtNoPol.setText("-");
-        jPanel1.add(txtNoPol);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(labelInfo1, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtJamMasuk, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(labelInfo2, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtGate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(labelInfo4, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtNoPol, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(labelInfo3, javax.swing.GroupLayout.PREFERRED_SIZE, 321, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtJamBayar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGap(10, 10, 10))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(labelInfo1, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtJamMasuk, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(labelInfo2, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtGate, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(labelInfo3, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtJamBayar, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(labelInfo4, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtNoPol, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)))
+        );
 
         javax.swing.GroupLayout panelInfoLayout = new javax.swing.GroupLayout(panelInfo);
         panelInfo.setLayout(panelInfoLayout);
@@ -352,12 +429,12 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
             panelInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelInfoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 232, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         txtOutput.setEditable(false);
-        txtOutput.setFont(new java.awt.Font("Tahoma", 1, 36)); // NOI18N
+        txtOutput.setFont(new java.awt.Font("Tahoma", 1, 30)); // NOI18N
         txtOutput.setFocusable(false);
         jScrollPane1.setViewportView(txtOutput);
 
@@ -374,7 +451,7 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
             panelOutputLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelOutputLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 169, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -396,7 +473,7 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
             panelBaseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelBaseLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(panelBaseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(panelBaseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(panelFoto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(panelBaseLayout.createSequentialGroup()
                         .addComponent(panelScan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -468,15 +545,15 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel labelCam1;
     private javax.swing.JLabel labelCam2;
+    private javax.swing.JLabel labelInfo1;
+    private javax.swing.JLabel labelInfo2;
+    private javax.swing.JLabel labelInfo3;
+    private javax.swing.JLabel labelInfo4;
     private javax.swing.JPanel panelBase;
     private javax.swing.JPanel panelFoto;
     private javax.swing.JPanel panelInfo;
@@ -509,14 +586,13 @@ public class GateOut extends javax.swing.JFrame implements readerBarcode, reader
                                 txtbarcode.setText(barcode.toString());
                                 txtOutput.setText("Scan Berhasil\n \nTerima kasih");
                                 barcode.delete(0, barcode.length());
+                                openGate();
                             } else {
                                 txtbarcode.setText(barcode.toString());
                                 txtOutput.setText("Scan Berhasil\n \nPembayaran belum dilakukan, silakan melakukan pembayaran terlebih dahulu");
                                 barcode.delete(0, barcode.length());
                             }
-                            getPic("192.168.43.149");
-                            showImage(saveFilePath, labelCam1);
-                            showImage(saveFilePath, labelCam2);
+                            showParkingPhotos();
                         } catch (Exception ex) {
                             Logger.getLogger(GateOut.class.getName()).log(Level.SEVERE, null, ex);
                         }

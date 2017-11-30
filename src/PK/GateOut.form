@@ -3,6 +3,9 @@
 <Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
+    <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+      <Dimension value="[1366, 768]"/>
+    </Property>
     <Property name="undecorated" type="boolean" value="true"/>
   </Properties>
   <SyntheticProperties>
@@ -69,7 +72,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" groupAlignment="1" attributes="0">
                       <Component id="panelFoto" max="32767" attributes="0"/>
                       <Group type="102" attributes="0">
                           <Component id="panelScan" min="-2" max="-2" attributes="0"/>
@@ -92,7 +95,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jPanel2" pref="633" max="32767" attributes="0"/>
+                      <Component id="jPanel2" pref="561" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -139,7 +142,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="txtbarcode" pref="570" max="32767" attributes="0"/>
+                      <Component id="txtbarcode" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -148,7 +151,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="txtbarcode" pref="43" max="32767" attributes="0"/>
+                      <Component id="txtbarcode" pref="54" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -161,7 +164,7 @@
                   <Font name="Tahoma" size="30" style="1"/>
                 </Property>
                 <Property name="horizontalAlignment" type="int" value="0"/>
-                <Property name="text" type="java.lang.String" value="Scan tiket terlebih dahulu ..."/>
+                <Property name="text" type="java.lang.String" value="-"/>
               </Properties>
               <Events>
                 <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="txtbarcodePropertyChange"/>
@@ -188,7 +191,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jPanel1" pref="232" max="32767" attributes="0"/>
+                      <Component id="jPanel1" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -196,72 +199,127 @@
           </Layout>
           <SubComponents>
             <Container class="javax.swing.JPanel" name="jPanel1">
+              <Properties>
+                <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[570, 316]"/>
+                </Property>
+              </Properties>
 
-              <Layout class="org.netbeans.modules.form.compat2.layouts.DesignGridLayout">
-                <Property name="columns" type="int" value="2"/>
-                <Property name="rows" type="int" value="4"/>
+              <Layout>
+                <DimensionLayout dim="0">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" attributes="0">
+                          <Component id="labelInfo1" min="-2" pref="321" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="txtJamMasuk" pref="305" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="102" attributes="0">
+                                  <Component id="labelInfo2" min="-2" pref="321" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="txtGate" max="32767" attributes="0"/>
+                              </Group>
+                              <Group type="102" attributes="0">
+                                  <Component id="labelInfo4" min="-2" pref="321" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="txtNoPol" max="32767" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="labelInfo3" min="-2" pref="321" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="txtJamBayar" max="32767" attributes="0"/>
+                              </Group>
+                          </Group>
+                          <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
+                </DimensionLayout>
+                <DimensionLayout dim="1">
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="labelInfo1" min="-2" pref="73" max="-2" attributes="0"/>
+                              <Component id="txtJamMasuk" min="-2" pref="73" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="labelInfo2" min="-2" pref="73" max="-2" attributes="0"/>
+                              <Component id="txtGate" min="-2" pref="73" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="labelInfo3" min="-2" pref="73" max="-2" attributes="0"/>
+                              <Component id="txtJamBayar" min="-2" pref="73" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="labelInfo4" min="-2" pref="73" max="-2" attributes="0"/>
+                              <Component id="txtNoPol" min="-2" pref="73" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                  </Group>
+                </DimensionLayout>
               </Layout>
               <SubComponents>
-                <Component class="javax.swing.JLabel" name="jLabel2">
+                <Component class="javax.swing.JLabel" name="labelInfo1">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Tahoma" size="30" style="1"/>
+                      <Font name="Tahoma" size="28" style="1"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Jam Masuk"/>
+                    <Property name="text" type="java.lang.String" value="-"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JLabel" name="txtJamMasuk">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Tahoma" size="30" style="1"/>
+                      <Font name="Tahoma" size="28" style="1"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="-"/>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JLabel" name="jLabel4">
+                <Component class="javax.swing.JLabel" name="labelInfo2">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Tahoma" size="30" style="1"/>
+                      <Font name="Tahoma" size="28" style="1"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Pintu Masuk"/>
+                    <Property name="text" type="java.lang.String" value="-"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JLabel" name="txtGate">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Tahoma" size="30" style="1"/>
+                      <Font name="Tahoma" size="28" style="1"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="-"/>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JLabel" name="jLabel6">
+                <Component class="javax.swing.JLabel" name="labelInfo3">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Tahoma" size="30" style="1"/>
+                      <Font name="Tahoma" size="28" style="1"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Jam Bayar"/>
+                    <Property name="text" type="java.lang.String" value="-"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JLabel" name="txtJamBayar">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Tahoma" size="30" style="1"/>
+                      <Font name="Tahoma" size="28" style="1"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="-"/>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JLabel" name="jLabel8">
+                <Component class="javax.swing.JLabel" name="labelInfo4">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Tahoma" size="30" style="1"/>
+                      <Font name="Tahoma" size="28" style="1"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Nomor Polisi"/>
+                    <Property name="text" type="java.lang.String" value="-"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JLabel" name="txtNoPol">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Tahoma" size="30" style="1"/>
+                      <Font name="Tahoma" size="28" style="1"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="-"/>
                   </Properties>
@@ -286,7 +344,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane1" pref="169" max="32767" attributes="0"/>
+                      <Component id="jScrollPane1" pref="98" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -304,7 +362,7 @@
                   <Properties>
                     <Property name="editable" type="boolean" value="false"/>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Tahoma" size="36" style="1"/>
+                      <Font name="Tahoma" size="30" style="1"/>
                     </Property>
                     <Property name="focusable" type="boolean" value="false"/>
                   </Properties>

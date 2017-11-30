@@ -22,7 +22,12 @@ public class ThreadRFID extends Thread {
     private GateOut ui;
     private RFIDcommand card = new RFIDcommand();
     private int memberID;
-
+    private String expired;
+    private int parkingStatus;
+    private final int[] statusP = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01};
+    private String parkingDate;
+    private String parkingTime;
+    
     public ThreadRFID(GateOut ui) {
         this.ui = ui;
     }
@@ -35,7 +40,11 @@ public class ThreadRFID extends Thread {
             public void cardDetected(MfCard mfCard, MfReaderWriter mfReaderWriter) throws IOException {
                 //printCardInfo(mfCard);
                 memberID = card.readValueTAG(9);
-                ui.getDataMember(memberID);
+                expired = card.readTAG(0x0A);
+                card.writeTAG(0x10, statusP);
+                parkingDate = card.readTAG(0x11);
+                parkingTime = card.readTAG(0x12);
+                ui.getDataMember(memberID, expired, parkingDate, parkingTime);
             }
         };
 
@@ -69,8 +78,7 @@ public class ThreadRFID extends Thread {
             System.out.println("No ACR122 reader found.");
             return;
         }
-        acr122.open();
-        
+        acr122.open();        
         acr122.listen(listener);
         System.out.println("Press ENTER to exit");
         System.in.read();

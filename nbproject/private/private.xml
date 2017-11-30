@@ -3,14 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/cls/RFID.java</file>
+            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/rfid/RFIDcommand.java</file>
+            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/PK/GateOut.java</file>
             <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/config/Params.java</file>
-            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/config/ConfigHelper.java</file>
-            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/testcode/tagscan.java</file>
-            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/db/Koneksi.java</file>
-            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/testcode/test.java</file>
-            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/GateOut/PintuKeluar.java</file>
-            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/interfaces/ThreadRFID.java</file>
+            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/rfid/Acr122Device.java</file>
+            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/cls/Member.java</file>
+            <file>file:/D:/Gian%20Permana/Projects/Hexapark/Program/GateOut/src/db/DBConnection.java</file>
         </group>
     </open-files>
 </project-private>
